@@ -114,6 +114,28 @@ class TestNewGameRoute:
         # but CURRENT should be updated
         assert new_puzzle == puzzle2
 
+    def test_new_game_uses_selected_difficulty(self, client):
+        response = client.get('/new?difficulty=easy')
+        data = response.get_json()
+        assert data['difficulty'] == 'easy'
+        assert sum(cell != 0 for row in data['puzzle'] for cell in row) == 45
+
+    def test_invalid_board_values_return_bad_request(self, client):
+        client.get('/new')
+        response = client.post('/check', json={'board': [['x'] * 9 for _ in range(9)]})
+        assert response.status_code == 400
+
+
+class TestHintRoute:
+    def test_hint_fills_one_empty_cell_and_tracks_usage(self, client):
+        client.get('/new')
+        board = [row[:] for row in app_module.CURRENT['puzzle']]
+        response = client.post('/hint', json={'board': board})
+        data = response.get_json()
+        assert response.status_code == 200
+        assert data['hints_used'] == 1
+        assert board[data['row']][data['col']] == 0
+
 
 class TestCheckRoute:
     """Test the check solution (/check) POST route."""

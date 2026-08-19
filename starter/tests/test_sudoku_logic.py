@@ -271,3 +271,12 @@ class TestGeneratePuzzle:
         # Solution should be unaffected by changes to puzzle
         original_solution_value = solution[0][0]
         assert solution[0][0] == original_solution_value
+
+    def test_generated_puzzle_has_exactly_one_solution(self):
+        puzzle, _ = sudoku_logic.generate_puzzle(clues=30)
+        assert sudoku_logic.count_solutions(puzzle, limit=2) == 1
+
+    def test_difficulty_clue_counts_are_distinct(self):
+        assert sudoku_logic.get_clue_count_for_difficulty('easy') == 45
+        assert sudoku_logic.get_clue_count_for_difficulty('medium') == 35
+        assert sudoku_logic.get_clue_count_for_difficulty('hard') == 30
